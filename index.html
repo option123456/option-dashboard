@@ -1,10 +1,141 @@
 <!DOCTYPE html>
-<html>
+<html lang="fa" dir="rtl">
 <head>
-<title>Option Dashboard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>داشبورد اختیار معامله</title>
+<style>
+body{
+font-family:tahoma;
+background:#f3f5f7;
+margin:0;
+padding:15px
+}
+.box{
+background:white;
+border-radius:15px;
+padding:15px;
+margin-bottom:15px
+}
+h1{
+background:#17202a;
+color:white;
+padding:20px;
+border-radius:15px
+}
+select,button{
+padding:10px;
+border-radius:8px;
+border:1px solid #ccc;
+font-size:16px
+}
+button{
+background:#17202a;
+color:white
+}
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:15px
+}
+td,th{
+border:1px solid #ddd;
+padding:8px;
+text-align:center
+}
+th{
+background:#eee
+}
+</style>
 </head>
+
 <body>
-<h1>Option Dashboard - قالب ۱</h1>
-<p>در حال آماده سازی...</p>
+
+<h1>
+🎯 داشبورد اختیار معامله — قالب ۱
+</h1>
+
+<div class="box">
+
+<h3>انتخاب نماد دارای اختیار</h3>
+
+<select id="symbol">
+<option>در حال دریافت...</option>
+</select>
+
+<button onclick="load()">بروزرسانی</button>
+
+<p id="status"></p>
+
+</div>
+
+
+<div id="result"></div>
+
+
+<script>
+
+async function symbols(){
+
+let r=await fetch('/api/symbols');
+
+let j=await r.json();
+
+let s=document.getElementById('symbol');
+
+s.innerHTML="";
+
+j.forEach(x=>{
+
+let o=document.createElement('option');
+
+o.value=x;
+
+o.textContent=x;
+
+s.appendChild(o);
+
+});
+
+}
+
+
+async function load(){
+
+let sym=document.getElementById('symbol').value;
+
+let r=await fetch('/api/options?symbol='+sym);
+
+let j=await r.json();
+
+
+document.getElementById('status').innerHTML=
+"آخرین بروزرسانی: "+new Date().toLocaleString('fa-IR');
+
+
+let h="";
+
+h+="<div class='box'>";
+h+="<h2>نماد: "+sym+"</h2>";
+
+h+="<h3>ماه اول 🟤</h3>";
+
+h+="<p>داده قراردادها پس از اتصال منبع نمایش داده می‌شود.</p>";
+
+h+="<h3>ماه دوم ⚫</h3>";
+
+h+="<p>داده قراردادها پس از اتصال منبع نمایش داده می‌شود.</p>";
+
+h+="</div>";
+
+document.getElementById('result').innerHTML=h;
+
+}
+
+
+symbols();
+
+</script>
+
 </body>
 </html>
