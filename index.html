@@ -1,141 +1,65 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fa" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>داشبورد اختیار معامله</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>داشبورد اختیار معامله — قالب ۱</title>
 <style>
-body{
-font-family:tahoma;
-background:#f3f5f7;
-margin:0;
-padding:15px
-}
-.box{
-background:white;
-border-radius:15px;
-padding:15px;
-margin-bottom:15px
-}
-h1{
-background:#17202a;
-color:white;
-padding:20px;
-border-radius:15px
-}
-select,button{
-padding:10px;
-border-radius:8px;
-border:1px solid #ccc;
-font-size:16px
-}
-button{
-background:#17202a;
-color:white
-}
-table{
-width:100%;
-border-collapse:collapse;
-margin-top:15px
-}
-td,th{
-border:1px solid #ddd;
-padding:8px;
-text-align:center
-}
-th{
-background:#eee
-}
+:root{color-scheme:light}*{box-sizing:border-box}body{font-family:Tahoma,Arial,sans-serif;margin:0;padding:12px;background:#f2f4f7;color:#202733}
+header,.panel{background:#fff;border-radius:14px;padding:15px;margin:0 0 13px;box-shadow:0 2px 10px #17202a0c}
+header{background:#17202a;color:white}h1{font-size:20px;margin:0 0 8px}h2{font-size:17px;margin:0 0 12px}h3{font-size:15px;margin:15px 0 8px}
+button{background:#17202a;color:white;border:0;border-radius:9px;padding:10px 14px;font-size:14px}button:disabled{opacity:.5}
+.status{padding:10px;border-radius:9px;background:#f1f3f5;font-size:13px;line-height:1.8;overflow-wrap:anywhere}.bad{background:#fff0f0;color:#a12626}.good{background:#eef9f0;color:#176a2e}
+.tablewrap{overflow-x:auto;width:100%;margin:8px 0 16px}table{border-collapse:collapse;min-width:850px;width:100%;font-size:12px;background:white}th,td{border:1px solid #dce1e6;padding:8px;text-align:center;white-space:nowrap}th{background:#e9edf1;font-weight:bold}td.empty{white-space:normal;color:#697586}
+.first{color:#8a5b16}.second{color:#343a40}.gain{color:#16803c}.loss{color:#c62828}.muted{font-size:12px;color:#626d7a;line-height:1.8}
 </style>
-</head>
-
-<body>
-
-<h1>
-🎯 داشبورد اختیار معامله — قالب ۱
-</h1>
-
-<div class="box">
-
-<h3>انتخاب نماد دارای اختیار</h3>
-
-<select id="symbol">
-<option>در حال دریافت...</option>
-</select>
-
-<button onclick="load()">بروزرسانی</button>
-
-<p id="status"></p>
-
-</div>
-
-
+</head><body>
+<header><h1>🎯 داشبورد اختیار معامله — قالب ۱</h1><div>نماد پایه: اهرم | دو سررسید نزدیک | ۵ قرارداد برتر هر سررسید</div></header>
+<section class="panel"><button id="refresh">دریافت / بروزرسانی اطلاعات</button><p id="status" class="status">برای دریافت داده‌ها دکمه را بزنید. قیمت زنده تا زمان تأیید منبع نمایش داده نمی‌شود.</p><p class="muted">منبع: دیده‌بان اختیار معامله TSETMC. اگر دسترسی منبع از محل میزبانی محدود باشد، خطا به‌صراحت نمایش داده می‌شود و عدد جایگزین ساخته نمی‌شود.</p></section>
 <div id="result"></div>
-
-
 <script>
-
-async function symbols(){
-
-let r=await fetch('/api/symbols');
-
-let j=await r.json();
-
-let s=document.getElementById('symbol');
-
-s.innerHTML="";
-
-j.forEach(x=>{
-
-let o=document.createElement('option');
-
-o.value=x;
-
-o.textContent=x;
-
-s.appendChild(o);
-
-});
-
+const $=id=>document.getElementById(id);
+const fa=n=>n===null||n===undefined||n===""?"—":Number.isFinite(Number(n))?Number(n).toLocaleString("fa-IR",{maximumFractionDigits:2}):String(n);
+const esc=s=>String(s??"—").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function table(title,headers,rows,cls=""){
+ let h='<section class="panel"><h2>'+title+'</h2><div class="tablewrap"><table><thead><tr>'+headers.map(x=>'<th>'+x+'</th>').join("")+'</tr></thead><tbody>';
+ if(!rows.length) h+='<tr><td class="empty" colspan="'+headers.length+'">اطلاعات معتبر برای این بخش دریافت نشد.</td></tr>';
+ else h+=rows.map(r=>'<tr>'+r.map((x,i)=>'<td class="'+(i===0?cls:"")+'">'+x+'</td>').join("")+'</tr>').join("");
+ return h+'</tbody></table></div></section>';
 }
-
-
-async function load(){
-
-let sym=document.getElementById('symbol').value;
-
-let r=await fetch('/api/options?symbol='+sym);
-
-let j=await r.json();
-
-
-document.getElementById('status').innerHTML=
-"آخرین بروزرسانی: "+new Date().toLocaleString('fa-IR');
-
-
-let h="";
-
-h+="<div class='box'>";
-h+="<h2>نماد: "+sym+"</h2>";
-
-h+="<h3>ماه اول 🟤</h3>";
-
-h+="<p>داده قراردادها پس از اتصال منبع نمایش داده می‌شود.</p>";
-
-h+="<h3>ماه دوم ⚫</h3>";
-
-h+="<p>داده قراردادها پس از اتصال منبع نمایش داده می‌شود.</p>";
-
-h+="</div>";
-
-document.getElementById('result').innerHTML=h;
-
+function render(data){
+ const options=data.options||[];
+ if(!options.length){
+  $("result").innerHTML='<section class="panel"><h2>قراردادهای اهرم شناسایی نشدند</h2><p>منبع پاسخ داده، اما در رکوردهای دریافتی هیچ ردیفی که به‌طور روشن به «اهرم» مربوط باشد پیدا نشد. برای جلوگیری از نمایش قرارداد اشتباه، محاسبه انجام نشده است.</p><details><summary>ساختار فنی پاسخ منبع</summary><pre style="white-space:pre-wrap;direction:ltr">'+esc((data.schema||[]).join(", "))+'</pre><p>تعداد ردیف‌های خام: '+fa(data.sourceRows)+'</p></details></section>';
+  return;
+ }
+ const expiryKey=o=>o.endDate||("روزهای باقی‌مانده: "+(o.remainingDay??"نامشخص"));
+ const keys=[...new Set(options.map(expiryKey))].sort((a,b)=>{
+  const da=Date.parse(a),db=Date.parse(b);
+  if(Number.isFinite(da)&&Number.isFinite(db))return da-db;
+  const ra=Number(String(a).match(/\d+/)?.[0]||99999),rb=Number(String(b).match(/\d+/)?.[0]||99999);return ra-rb;
+ }).slice(0,2);
+ const groups=keys.map(k=>options.filter(o=>expiryKey(o)===k).sort((a,b)=>Number(b.tradedValue||0)-Number(a.tradedValue||0)).slice(0,5));
+ let html='<section class="panel"><h2>وضعیت دریافت</h2><div class="status good">پاسخ منبع دریافت شد؛ زمان دریافت: '+esc(new Date(data.fetchedAt).toLocaleString("fa-IR"))+'؛ ردیف‌های منطبق: '+fa(options.length)+'.</div><p class="muted">قبل از استفاده معاملاتی، ستون‌ها و نگاشت قیمت پایه باید با ساختار فعلی منبع تأیید شوند.</p></section>';
+ const heads=["قرارداد","قیمت اختیار","قیمت پایه","قیمت اعمال","سر به سر*","ارزش معامله روز","ریسک","هدف/وضعیت"];
+ groups.forEach((g,i)=>{
+  const label=i===0?"ماه اول 🟤":"ماه دوم ⚫";
+  const rows=g.map(o=>[esc(o.name||o.code||"قرارداد"),fa(o.premium),fa(o.underlyingPrice),fa(o.strike), "—",fa(o.tradedValue),"—", "—"]);
+  html+=table(label+" — ۵ قرارداد برتر بر اساس ارزش معامله",heads,rows,i===0?"first":"second");
+ });
+ html+='<section class="panel"><h2>جدول ۲ — سناریوهای افت قیمت پایه</h2><p class="muted">برای محاسبه معتبر این جدول، قیمت پایه و نوع قرارداد (خرید/فروش) باید از منبع به‌صورت قطعی شناسایی شود. در داده فعلی این فیلدها هنوز تأیید نشده‌اند؛ بنابراین سود و زیان عددسازی نمی‌شود.</p></section>';
+ html+='<section class="panel"><h2>جدول ۳ — مقایسه رشد قیمت پایه از ۵٪ تا ۵۰٪</h2><p class="muted">محاسبه بازده اختیار نیازمند قیمت پایه، نوع قرارداد، قیمت اختیار و مشخصات قراردادِ تأییدشده است. پس از تأیید نگاشت این فیلدها، مقایسه بدون تغییر قالب تکمیل می‌شود.</p></section>';
+ $("result").innerHTML=html;
 }
-
-
-symbols();
-
-</script>
-
-</body>
-</html>
+async function refresh(){
+ $("refresh").disabled=true;$("status").className="status";$("status").textContent="در حال اتصال به منبع اختیار معامله…";
+ try{
+  const r=await fetch("/api/options?refresh=1",{cache:"no-store"});const d=await r.json();
+  if(!r.ok)throw new Error(d.error||"دریافت داده ناموفق بود.");
+  $("status").textContent="اتصال برقرار شد؛ در حال بررسی قراردادهای اهرم…";render(d);
+  if(!(d.options||[]).length)$("status").className="status bad";
+ }catch(e){$("status").className="status bad";$("status").textContent="اطلاعات زنده دریافت نشد: "+e.message+" لطفاً بعداً دوباره تلاش کنید. قیمت قدیمی یا تخمینی نمایش داده نمی‌شود.";$("result").innerHTML="";}
+ finally{$("refresh").disabled=false}
+}
+$("refresh").addEventListener("click",refresh);
+refresh();
+</script></body></html>
